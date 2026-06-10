@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgroLink Platform Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --forest: #1A3C2B;
+      --cream: #F5F0E8;
+      --amber: #E8A838;
+      --mid: #2D6A4F;
+      --charcoal: #3D3D3D;
+      --line: rgba(26, 60, 43, .16);
+      --paper: #fffaf2;
+      --muted: #746f65;
+      --danger: #b83b35;
+      --shadow: 0 18px 40px rgba(26, 60, 43, .12);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-family: Inter, system-ui, sans-serif;
+      line-height: 1.45;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--forest); font-weight: 700; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    .mono { font-family: "JetBrains Mono", monospace; }
+    .display { font-family: Fraunces, Georgia, serif; letter-spacing: 0; }
+    .app { min-height: 100vh; }
+    .top-shell {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px clamp(16px, 4vw, 42px);
+      background: rgba(245, 240, 232, .92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--forest);
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      color: var(--forest);
+      background: linear-gradient(135deg, rgba(232,168,56,.95), rgba(45,106,79,.22));
+      border: 1px solid rgba(26,60,43,.15);
+    }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .nav-link {
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--forest);
+      font-weight: 700;
+      font-size: .92rem;
+    }
+    .nav-link.active, .nav-link:hover { background: rgba(232, 168, 56, .2); }
+    .auth-menu {
+      position: relative;
+      display: inline-flex;
+    }
+    .auth-toggle {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffdf8;
+      color: var(--forest);
+      padding: 9px 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+    .auth-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      display: none;
+      min-width: 180px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffdf8;
+      box-shadow: var(--shadow);
+    }
+    .auth-menu.open .auth-dropdown { display: grid; gap: 4px; }
+    .auth-dropdown a {
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: var(--forest);
+    }
+    .auth-dropdown a:hover, .auth-dropdown a.active { background: rgba(232,168,56,.2); }
+    .icon-btn.menu-toggle { display: none; }
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 250, 242, .72);
+      color: var(--forest);
+    }
+    .page {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+    .section-head {
+      margin: 0 0 18px;
+      color: var(--forest);
+      font-size: clamp(1.55rem, 4vw, 2.5rem);
+      line-height: 1.05;
+    }
+    .section-head::after {
+      content: "";
+      display: block;
+      width: min(180px, 58vw);
+      height: 4px;
+      margin-top: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--forest), var(--mid), var(--amber), var(--forest));
+      background-size: 220% 100%;
+      animation: pulseUnderline 1.8s ease-out 1, flowUnderline 4.2s ease-in-out infinite 1.8s;
+    }
+    @keyframes pulseUnderline {
+      from { transform: scaleX(.3); opacity: .35; }
+      to { transform: scaleX(1); opacity: 1; }
+    }
+    @keyframes flowUnderline {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .subtle { color: var(--muted); }
+    .auth-wrap {
+      min-height: calc(100vh - 65px);
+      display: grid;
+      place-items: center;
+      padding: 28px 14px;
+    }
+    .auth-card, .panel, .stat-card, .product-card, .role-card, .ad-card, .modal-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .auth-card {
+      width: min(520px, 100%);
+      padding: clamp(22px, 5vw, 34px);
+    }
+    .field { margin: 14px 0; }
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--forest);
+      font-size: .9rem;
+      font-weight: 800;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(26,60,43,.25);
+      border-radius: 8px;
+      background: #fffdf8;
+    }
+    .input-row:focus-within { border-color: var(--mid); box-shadow: 0 0 0 3px rgba(232,168,56,.22); }
+    .input-row select, .input-row input, .input-row textarea {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      padding: 12px;
+      color: var(--charcoal);
+    }
+    .input-row select {
+      flex: 0 0 112px;
+      border-right: 1px solid var(--line);
+      color: var(--forest);
+      font-weight: 800;
+    }
+    .text-btn {
+      border: 0;
+      background: transparent;
+      color: var(--forest);
+      font-weight: 800;
+      padding: 0 12px;
+      white-space: nowrap;
+    }
+    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .role-card {
+      text-align: left;
+      box-shadow: none;
+      padding: 15px;
+      border-width: 2px;
+      background: #fffdf8;
+    }
+    .role-card strong { display: block; color: var(--forest); }
+    .role-card.selected {
+      border-color: var(--amber);
+      background: rgba(232,168,56,.18);
+      box-shadow: 0 10px 24px rgba(232, 168, 56, .18);
+    }
+    .primary, .secondary, .ghost, .danger {
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      padding: 10px 14px;
+      font-weight: 850;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .primary { background: var(--forest); color: white; }
+    .primary.amber { background: var(--amber); color: var(--forest); }
+    .secondary { background: var(--mid); color: white; }
+    .ghost { background: #fffdf8; border-color: var(--line); color: var(--forest); }
+    .danger { background: transparent; border-color: rgba(184,59,53,.45); color: var(--danger); }
+    .full { width: 100%; }
+    .strength {
+      height: 8px;
+      background: rgba(26,60,43,.11);
+      border-radius: 999px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .strength span { display: block; height: 100%; width: 25%; background: var(--danger); transition: .25s; }
+    .hint { font-size: .82rem; margin-top: 6px; color: var(--muted); }
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 90;
+      transform: translateY(30px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--forest);
+      color: white;
+      box-shadow: var(--shadow);
+      transition: .25s;
+      font-weight: 700;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .market-hero {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+    .searchbar {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 180px;
+      max-width: 520px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffdf8;
+    }
+    .searchbar input {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 12px 0;
+      outline: 0;
+    }
+    .featured-strip {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(220px, 280px);
+      gap: 14px;
+      overflow-x: auto;
+      padding: 2px 2px 16px;
+      scrollbar-color: var(--amber) transparent;
+    }
+    .featured-item {
+      position: relative;
+      min-height: 142px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--forest);
+      color: white;
+    }
+    .featured-item img { width: 100%; height: 100%; object-fit: cover; opacity: .78; }
+    .featured-item div { position: absolute; inset: auto 12px 12px; }
+    .featured-item b { display: block; font-family: Fraunces, Georgia, serif; font-size: 1.15rem; }
+    .market-layout {
+      display: grid;
+      grid-template-columns: 255px 1fr;
+      gap: 20px;
+      align-items: start;
+      margin-top: 20px;
+    }
+    .filters {
+      position: sticky;
+      top: 86px;
+      padding: 16px;
+      background: #fffdf8;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .filter-drawer { display: none; }
+    .check-row, .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 34px;
+      color: var(--forest);
+      font-weight: 700;
+    }
+    .switch {
+      width: 45px;
+      height: 25px;
+      border-radius: 99px;
+      background: rgba(26,60,43,.18);
+      position: relative;
+      border: 0;
+    }
+    .switch::after {
+      content: "";
+      position: absolute;
+      width: 19px;
+      height: 19px;
+      top: 3px;
+      left: 3px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+      transition: .2s;
+    }
+    .switch.on { background: var(--mid); }
+    .switch.on::after { left: 23px; }
+    .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .product-card {
+      overflow: hidden;
+      box-shadow: none;
+      transition: transform .2s, box-shadow .2s, outline-color .2s;
+      outline: 2px solid transparent;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); outline-color: rgba(232,168,56,.8); }
+    .product-img { height: 168px; width: 100%; object-fit: cover; background: rgba(26,60,43,.1); }
+    .product-body { padding: 14px; }
+    .product-title { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(232,168,56,.24);
+      color: var(--forest);
+      font-size: .72rem;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+    .status {
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: .76rem;
+      font-weight: 850;
+      color: var(--forest);
+      background: rgba(45,106,79,.14);
+    }
+    .status.pending { background: rgba(232,168,56,.28); }
+    .status.shipped { background: rgba(26,60,43,.13); }
+    .status.delivered { color: white; background: var(--mid); }
+    .dash-shell {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      min-height: calc(100vh - 65px);
+    }
+    .side {
+      position: sticky;
+      top: 65px;
+      height: calc(100vh - 65px);
+      padding: 20px 14px;
+      background: var(--forest);
+      color: white;
+    }
+    .side .brand { color: white; margin-bottom: 20px; }
+    .side button {
+      width: 100%;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: rgba(255,255,255,.82);
+      padding: 11px 12px;
+      text-align: left;
+      font-weight: 800;
+    }
+    .side button.active, .side button:hover { background: rgba(232,168,56,.18); color: white; }
+    .main-area { padding: 26px clamp(14px, 4vw, 34px); min-width: 0; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .stat-card { box-shadow: none; padding: 16px; }
+    .stat-card .mono { font-size: clamp(1.35rem, 3vw, 2rem); color: var(--forest); }
+    .trend { color: var(--mid); font-weight: 850; }
+    .panel { box-shadow: none; padding: 16px; margin-top: 18px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 700px; border-collapse: collapse; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    th { color: var(--forest); font-size: .78rem; text-transform: uppercase; letter-spacing: 0; }
+    .thumb { width: 52px; height: 42px; border-radius: 8px; object-fit: cover; }
+    .tabbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 18px;
+    }
+    .tabbar button {
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      color: var(--forest);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-weight: 850;
+    }
+    .tabbar button.active { background: var(--forest); color: white; }
+    .cards-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .ad-card { box-shadow: none; padding: 15px; }
+    .chart {
+      height: 245px;
+      display: flex;
+      gap: 12px;
+      align-items: end;
+      padding: 20px 10px 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffdf8;
+    }
+    .bar { flex: 1; min-width: 24px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, var(--amber), var(--mid)); position: relative; }
+    .bar span { position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%); font-size: .78rem; color: var(--muted); }
+    .account-layout {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .account-nav {
+      position: sticky;
+      top: 86px;
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fffdf8;
+    }
+    .account-nav button {
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      text-align: left;
+      padding: 10px;
+      color: var(--forest);
+      font-weight: 850;
+    }
+    .account-nav button.active { background: rgba(232,168,56,.22); }
+    .avatar {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--amber), var(--mid));
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+    .faq { border-top: 1px solid var(--line); }
+    .faq button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+      color: var(--forest);
+      text-align: left;
+      font-weight: 850;
+    }
+    .faq p { display: none; margin: 0; padding: 0 0 14px; color: var(--muted); }
+    .faq.open p { display: block; }
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      z-index: 70;
+      padding: 16px;
+      background: rgba(26,60,43,.45);
+    }
+    .modal.show { display: grid; }
+    .modal-card {
+      width: min(640px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      padding: 20px;
+      box-shadow: 0 20px 80px rgba(0,0,0,.25);
+    }
+    .tracker {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .step {
+      min-height: 72px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(45,106,79,.1);
+      color: var(--forest);
+      font-weight: 850;
+      text-align: center;
+    }
+    .step.done { background: var(--mid); color: white; }
+    .mobile-only { display: none; }
+
+    @media (max-width: 920px) {
+      .top-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        padding: 10px 12px;
+      }
+      .brand { min-width: 0; font-size: 1.2rem; }
+      .nav-actions {
+        grid-column: 2;
+        grid-row: 1;
+        margin-left: 0;
+        justify-content: end;
+      }
+      .icon-btn.menu-toggle { display: grid; }
+      .nav-links {
+        display: none;
+        grid-column: 1 / -1;
+        grid-row: 3;
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fffdf8;
+        box-shadow: 0 10px 24px rgba(26,60,43,.08);
+      }
+      .top-shell.menu-open .nav-links { display: grid; gap: 4px; }
+      .nav-link { width: 100%; padding: 12px; }
+      .auth-dropdown {
+        right: 0;
+        width: min(220px, calc(100vw - 24px));
+      }
+      .searchbar {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        max-width: none;
+        width: 100%;
+        min-width: 0;
+      }
+      .market-hero, .market-layout, .dash-shell, .account-layout { grid-template-columns: 1fr; }
+      .filters { display: none; position: static; }
+      .filters.open { display: block; }
+      .filter-drawer, .mobile-only { display: inline-flex; }
+      .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .side {
+        position: static;
+        height: auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+      .side .brand { grid-column: 1 / -1; margin-bottom: 6px; }
+      .stats, .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .account-nav { position: static; grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 620px) {
+      .page { width: min(100% - 22px, 1180px); padding-top: 20px; }
+      .top-shell { grid-template-columns: minmax(0, 1fr) auto; }
+      .brand-mark { width: 32px; height: 32px; }
+      .auth-toggle { width: 42px; padding: 0; font-size: 0; }
+      .auth-toggle::before { content: "◉"; font-size: 1rem; }
+      .nav-actions { gap: 6px; }
+      .icon-btn { width: 40px; height: 40px; }
+      .role-grid, .product-grid, .stats, .cards-grid, .tracker { grid-template-columns: 1fr; }
+      .side { grid-template-columns: repeat(2, 1fr); }
+      .side button { text-align: center; }
+      .auth-card, .panel { padding: 16px; }
+      .product-img { height: 190px; }
+      .account-nav { grid-template-columns: 1fr; }
+      .input-row select { flex-basis: 98px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app"></div>
+  <div class="toast" id="toast"></div>
+  <div class="modal" id="modal" aria-hidden="true"></div>
+
+  <script>
+    const products = [
+      { name: "Green Bottle Gourd", farmer: "Rahman Family Farm", price: "৳ 45/kg", badge: "New Listings", img: "https://images.unsplash.com/photo-1597362925123-77861d3fbac7?auto=format&fit=crop&w=900&q=80", cat: "Vegetables" },
+      { name: "Fresh Red Tomato", farmer: "Mitali Agro", price: "৳ 62/kg", badge: "", img: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=900&q=80", cat: "Vegetables" },
+      { name: "Aromatic Rice", farmer: "Haor Harvest Co.", price: "৳ 82/kg", badge: "New Listings", img: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=900&q=80", cat: "Grains" },
+      { name: "Sweet Mango", farmer: "Rajshahi Orchard", price: "৳ 120/kg", badge: "", img: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=900&q=80", cat: "Fruits" },
+      { name: "Whole Cow Milk", farmer: "Natore Dairy", price: "৳ 78/litre", badge: "", img: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=900&q=80", cat: "Dairy" },
+      { name: "Golden Potato", farmer: "Bogura Growers", price: "৳ 38/kg", badge: "New Listings", img: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=900&q=80", cat: "Vegetables" }
+    ];
+    const orders = [
+      ["AG-1029", "Bismillah Store", "Green Bottle Gourd", "80 kg", "Pending", "9 Jun"],
+      ["AG-1028", "North Bazaar Mart", "Aromatic Rice", "220 kg", "Confirmed", "8 Jun"],
+      ["AG-1027", "FreshCart Dhaka", "Sweet Mango", "60 kg", "Shipped", "8 Jun"],
+      ["AG-1026", "Mina Retail", "Golden Potato", "150 kg", "Delivered", "7 Jun"]
+    ];
+    const app = document.getElementById("app");
+    const toast = document.getElementById("toast");
+    const modal = document.getElementById("modal");
+    let selectedRole = "farmer";
+    let dashTab = "overview";
+    let accountTab = "info";
+    let productView = "list";
+
+    function icon(name) {
+      const map = { cart: "🧺", user: "◉", search: "⌕", menu: "☰", eye: "◐", plus: "+", chart: "↗" };
+      return map[name] || name;
+    }
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+    function go(route) { location.hash = route; }
+    function toggleNavMenu(button) {
+      const header = button.closest(".top-shell");
+      const open = !header.classList.contains("menu-open");
+      header.classList.toggle("menu-open", open);
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    function toggleAuthMenu(button) {
+      const menu = button.closest(".auth-menu");
+      const open = !menu.classList.contains("open");
+      document.querySelectorAll(".auth-menu.open").forEach(item => item.classList.remove("open"));
+      menu.classList.toggle("open", open);
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    function nav(current) {
+      const links = [["#/market","Market"],["#/dashboard","Dashboard"],["#/account","Account"]];
+      const authActive = current === "signup" || current === "login";
+      const search = current === "market" ? `<label class="searchbar" aria-label="Search marketplace">${icon("search")}<input placeholder="Search produce, farmer, or region"></label>` : "";
+      return `<header class="top-shell">
+        <a class="brand" href="#/market"><span class="brand-mark">🌾</span>AgroLink</a>
+        ${search}
+        <nav class="nav-links">${links.map(([href,label]) => `<a class="nav-link ${href.includes(current) ? "active" : ""}" href="${href}">${label}</a>`).join("")}</nav>
+        <div class="nav-actions">
+          ${current === "market" ? `<button class="icon-btn" title="Cart">${icon("cart")}</button>` : ""}
+          <div class="auth-menu">
+            <button class="auth-toggle ${authActive ? "active" : ""}" type="button" aria-haspopup="true" aria-expanded="false" onclick="toggleAuthMenu(this)">Sign In / Up</button>
+            <div class="auth-dropdown">
+              <a class="${current === "login" ? "active" : ""}" href="#/login">Log In</a>
+              <a class="${current === "signup" ? "active" : ""}" href="#/signup">Sign Up</a>
+            </div>
+          </div>
+          <button class="icon-btn menu-toggle" title="Menu" aria-expanded="false" onclick="toggleNavMenu(this)">${icon("menu")}</button>
+        </div>
+      </header>`;
+    }
+    function authPage(kind) {
+      const signup = kind === "signup";
+      app.innerHTML = `${nav(kind)}<main class="auth-wrap"><section class="auth-card">
+        <h1 class="section-head display">${signup ? "Create Your AgroLink Account" : "Welcome Back"}</h1>
+        <p class="subtle">${signup ? "Join as a farmer seller or retailer buyer with phone-first access." : "Log in with your phone number to continue."}</p>
+        <form id="authForm">
+          ${signup ? `<div class="field"><label>Full Name</label><div class="input-row"><input required placeholder="e.g. Nusrat Karim"></div></div>` : ""}
+          <div class="field"><label>Phone Number</label><div class="input-row"><select><option>BD +880</option><option>IN +91</option><option>US +1</option></select><input id="phone" required inputmode="numeric" placeholder="1712345678"></div><div class="hint" id="phoneHint">BD numbers should be 10 digits after +880 and start with 1.</div></div>
+          <div class="field"><label>Password</label><div class="input-row"><input id="password" required type="password" placeholder="Enter password"><button class="text-btn" type="button" onclick="togglePassword('password')">${icon("eye")}</button></div>${signup ? `<div class="strength"><span id="strengthBar"></span></div><div class="hint" id="strengthText">Use 8+ characters with a number.</div>` : ""}</div>
+          ${signup ? `<div class="field"><label>Confirm Password</label><div class="input-row"><input id="confirm" required type="password" placeholder="Repeat password"><button class="text-btn" type="button" onclick="togglePassword('confirm')">${icon("eye")}</button></div></div>
+          <div class="field"><label>Choose Role</label><div class="role-grid">
+            <button type="button" class="role-card selected" data-role="farmer" onclick="selectRole('farmer')"><strong>🌾 Farmer</strong><span>I grow and sell produce</span></button>
+            <button type="button" class="role-card" data-role="retailer" onclick="selectRole('retailer')"><strong>🏪 Retailer</strong><span>I buy and resell produce</span></button>
+          </div></div>` : `<p style="text-align:right;margin:8px 0 14px"><a href="#" onclick="showToast('OTP reset flow preview opened')">Forgot Password?</a></p>`}
+          <button class="primary ${signup ? "amber" : ""} full" type="submit">${signup ? "Create Account" : "Log In"}</button>
+        </form>
+        <p class="subtle" style="text-align:center;margin-bottom:0">${signup ? "Already have an account?" : "New to AgroLink?"} <a href="#/${signup ? "login" : "signup"}">${signup ? "Log in" : "Sign up"}</a></p>
+      </section></main>`;
+      bindAuth(signup);
+    }
+    function togglePassword(id) {
+      const input = document.getElementById(id);
+      input.type = input.type === "password" ? "text" : "password";
+    }
+    function selectRole(role) {
+      selectedRole = role;
+      document.querySelectorAll(".role-card").forEach(card => card.classList.toggle("selected", card.dataset.role === role));
+    }
+    function bindAuth(signup) {
+      const phone = document.getElementById("phone");
+      const pass = document.getElementById("password");
+      const strengthBar = document.getElementById("strengthBar");
+      const strengthText = document.getElementById("strengthText");
+      phone.addEventListener("input", () => {
+        const ok = /^1[3-9]\d{8}$/.test(phone.value.trim());
+        document.getElementById("phoneHint").textContent = ok ? "Valid Bangladesh phone format." : "BD numbers should be 10 digits after +880 and start with 1.";
+      });
+      if (signup) pass.addEventListener("input", () => {
+        const v = pass.value;
+        let score = (v.length >= 8) + (/\d/.test(v)) + (/[A-Z]/.test(v)) + (/[^A-Za-z0-9]/.test(v));
+        strengthBar.style.width = [25,45,68,88,100][score] + "%";
+        strengthBar.style.background = score > 2 ? "var(--mid)" : score > 1 ? "var(--amber)" : "var(--danger)";
+        strengthText.textContent = score > 2 ? "Strong enough for marketplace access." : "Use 8+ characters with a number and symbol.";
+      });
+      document.getElementById("authForm").addEventListener("submit", e => {
+        e.preventDefault();
+        if (!/^1[3-9]\d{8}$/.test(phone.value.trim())) return showToast("Enter a valid BD phone number.");
+        if (signup && pass.value !== document.getElementById("confirm").value) return showToast("Passwords do not match.");
+        showToast(signup ? "Account created. Please log in." : "Logged in successfully.");
+        setTimeout(() => go(signup ? "/login" : (selectedRole === "farmer" ? "/dashboard" : "/market")), 600);
+      });
+    }
+    function marketPage() {
+      app.innerHTML = `${nav("market")}<main class="page">
+        <section class="market-hero"><div><h1 class="section-head display">Fresh Produce, Direct From Growers</h1><p class="subtle">Browse verified farmer listings, compare prices, and build your cart for the day’s supply run.</p></div><button class="ghost filter-drawer" onclick="document.querySelector('.filters').classList.toggle('open')">${icon("menu")} Filters</button></section>
+        <h2 class="section-head display" style="font-size:1.45rem">Featured Today</h2>
+        <div class="featured-strip">${products.slice(0,4).map(p => `<article class="featured-item"><img src="${p.img}" alt="${p.name}"><div><b>${p.name}</b><span class="mono">${p.price}</span></div></article>`).join("")}</div>
+        <section class="market-layout">
+          <aside class="filters"><h3 class="display" style="margin-top:0;color:var(--forest)">Filters</h3>${["Vegetables","Fruits","Grains","Dairy"].map(c => `<label class="check-row"><span>${c}</span><input type="checkbox"></label>`).join("")}<div class="field"><label>Price range</label><input type="range" min="20" max="200" value="90" style="width:100%"></div><div class="field"><label>Region</label><div class="input-row"><select style="flex:1;border:0"><option>All Bangladesh</option><option>Rajshahi</option><option>Khulna</option><option>Dhaka</option></select></div></div><div class="switch-row">In Stock only <button class="switch on" onclick="this.classList.toggle('on')" aria-label="In stock toggle"></button></div></aside>
+          <div><div class="product-grid">${products.map(productCard).join("")}</div><div class="actions" style="justify-content:center;margin-top:22px"><button class="ghost">Page 1</button><button class="primary">Load More</button></div></div>
+        </section>
+      </main>`;
+    }
+    function productCard(p) {
+      return `<article class="product-card"><img class="product-img" src="${p.img}" alt="${p.name}"><div class="product-body"><div class="product-title"><h3 class="display" style="margin:0;color:var(--forest);font-size:1.12rem">${p.name}</h3>${p.badge ? `<span class="badge">${p.badge}</span>` : ""}</div><p class="subtle" style="margin:7px 0">${p.farmer}</p><p class="mono" style="color:var(--forest);font-size:1.15rem;margin:0 0 12px">${p.price}</p><button class="primary amber full" onclick="showToast('${p.name} added to cart')">${icon("cart")} Add to Cart</button></div></article>`;
+    }
+    function dashboardPage() {
+      app.innerHTML = `<div class="dash-shell">${sideNav()}<main class="main-area" id="dashMain"></main></div>`;
+      renderDash();
+    }
+    function sideNav() {
+      return `<aside class="side"><a class="brand" href="#/market"><span class="brand-mark">🌾</span>AgroLink</a>${["overview","products","orders","ads","earnings"].map(t => `<button class="${dashTab===t?"active":""}" onclick="dashTab='${t}';renderDash()">${t[0].toUpperCase()+t.slice(1).replace("ads","Active Ads")}</button>`).join("")}</aside>`;
+    }
+    function renderDash() {
+      document.querySelector(".side").innerHTML = sideNav().replace(/^<aside class="side">|<\/aside>$/g, "");
+      const main = document.getElementById("dashMain");
+      const title = {overview:"Seller Overview", products:"My Products", orders:"Orders", ads:"Active Ads", earnings:"Earnings"}[dashTab];
+      main.innerHTML = `<h1 class="section-head display">${title}</h1>` + ({overview: dashOverview, products: dashProducts, orders: dashOrders, ads: dashAds, earnings: dashEarnings}[dashTab])();
+    }
+    function dashOverview() {
+      return `<section class="stats">${[["Total Sales","৳ 245k","↗ 12%"],["Active Listings","18","↗ 3"],["Pending Orders","9","↗ 2"],["Revenue This Month","৳ 86k","↗ 18%"]].map(s => `<article class="stat-card"><p class="subtle">${s[0]}</p><div class="mono">${s[1]}</div><span class="trend">${s[2]}</span></article>`).join("")}</section><div class="actions"><button class="primary amber" onclick="openProductModal()">${icon("plus")} Add New Product</button><button class="secondary" onclick="dashTab='ads';renderDash()">Boost a Listing</button></div><section class="panel"><h2 class="display" style="color:var(--forest)">Recent Orders</h2>${ordersTable(orders.slice(0,4))}</section>`;
+    }
+    function dashProducts() {
+      return `<div class="actions"><button class="primary amber" onclick="openProductModal()">${icon("plus")} Add New Product</button><button class="ghost" onclick="productView='list';renderDash()">List</button><button class="ghost" onclick="productView='grid';renderDash()">Grid</button></div><section class="${productView === "grid" ? "product-grid" : "panel"}">${productView === "grid" ? products.slice(0,4).map(productCard).join("") : productsTable()}</section>`;
+    }
+    function productsTable() {
+      return `<div class="table-wrap"><table><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody>${products.slice(0,5).map((p,i) => `<tr><td><img class="thumb" src="${p.img}" alt=""> ${p.name}</td><td class="mono">${p.price}</td><td>${80+i*35} kg</td><td><button class="switch on" onclick="this.classList.toggle('on')" aria-label="Active toggle"></button></td><td><button class="ghost">Edit</button> <button class="danger">Delete</button></td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function dashOrders() {
+      return `<div class="actions"><button class="ghost">All</button><button class="ghost">Pending</button><button class="ghost">Shipped</button></div><section class="panel">${ordersTable(orders, true)}</section>`;
+    }
+    function ordersTable(rows, expandable) {
+      return `<div class="table-wrap"><table><thead><tr><th>Order ID</th><th>Retailer</th><th>Product</th><th>Qty</th><th>Status</th><th>Date</th></tr></thead><tbody>${rows.map(o => `<tr ${expandable ? `onclick="showOrder('${o[0]}')"` : ""}><td class="mono">${o[0]}</td><td>${o[1]}</td><td>${o[2]}</td><td>${o[3]}</td><td><span class="status ${o[4].toLowerCase()}">${o[4]}</span></td><td>${o[5]}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function dashAds() {
+      return `<div class="actions"><button class="primary amber" onclick="showToast('Create ad drawer preview')">Create New Ad</button></div><section class="cards-grid">${products.slice(0,3).map((p,i) => `<article class="ad-card"><span class="badge">${i ? "Boosted" : "Featured"}</span><h3 class="display" style="color:var(--forest)">${p.name}</h3><p>Budget spent <b class="mono">৳ ${1200+i*650}</b></p><p>Impressions <b class="mono">${(6+i*3)}.${i}k</b></p><p>Clicks <b class="mono">${180+i*52}</b></p><p class="subtle">Expires ${12+i} Jun</p></article>`).join("")}</section>`;
+    }
+    function dashEarnings() {
+      return `<div class="actions"><button class="ghost">Weekly</button><button class="primary">Monthly</button></div><section class="panel"><div class="chart">${[42,72,55,95,80,120,100].map((h,i) => `<div class="bar" style="height:${h}%"><span>${["Sat","Sun","Mon","Tue","Wed","Thu","Fri"][i]}</span></div>`).join("")}</div></section><section class="panel"><h2 class="display" style="color:var(--forest)">Payout History</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody><tr><td>8 Jun</td><td class="mono">৳ 18,200</td><td><span class="status delivered">Paid</span></td></tr><tr><td>1 Jun</td><td class="mono">৳ 13,900</td><td><span class="status pending">Pending</span></td></tr></tbody></table></div></section>`;
+    }
+    function accountPage() {
+      const tabs = [["info","Account Info"],["orders","Placed Orders"],["listings","My Listings"],["notifications","Notifications"],["security","Security"],["help","Help & Support"],["logout","Log Out"]];
+      app.innerHTML = `${nav("account")}<main class="page"><h1 class="section-head display">Account Centre</h1><section class="account-layout"><nav class="account-nav">${tabs.map(t => `<button class="${accountTab===t[0]?"active":""}" onclick="accountTab='${t[0]}';accountPage()">${t[1]}</button>`).join("")}</nav><div class="panel">${accountContent()}</div></section></main>`;
+    }
+    function accountContent() {
+      const form = `<div class="avatar">AK</div><div class="field"><label>Profile Photo</label><div class="input-row"><input type="file"></div></div><div class="field"><label>Full Name</label><div class="input-row"><input value="Amina Karim"></div></div><div class="field"><label>Phone Number</label><div class="input-row"><input value="+880 1712345678" disabled><button class="text-btn" onclick="showToast('OTP change number flow')">Change</button></div></div><p><span class="badge">Farmer</span></p><button class="primary amber">Save Changes</button>`;
+      const placed = `<h2 class="display" style="color:var(--forest)">Placed Orders</h2>${ordersTable(orders.map(o => [o[0], o[2], o[1], o[3], o[4], o[5]]), true)}`;
+      const listings = `<h2 class="display" style="color:var(--forest)">My Listings</h2><p class="subtle">Manage stock, photos, pricing, and status from the farmer dashboard.</p><button class="primary" onclick="go('/dashboard')">Open Seller Dashboard</button>`;
+      const notifications = ["New Order alerts","Promotion updates","Price change alerts","System messages"].map(n => `<div class="switch-row">${n}<button class="switch on" onclick="this.classList.toggle('on')"></button></div>`).join("");
+      const security = `<div class="field"><label>Current Password</label><div class="input-row"><input type="password"></div></div><div class="field"><label>New Password</label><div class="input-row"><input type="password"></div></div><div class="field"><label>Confirm New Password</label><div class="input-row"><input type="password"></div></div><button class="primary">Change Password</button><h3 class="display" style="color:var(--forest)">Active Sessions</h3><p class="subtle">Dhaka mobile browser, current session</p><button class="danger">Log out all devices</button>`;
+      const help = `<div class="faq"><button onclick="this.parentElement.classList.toggle('open')">How do payouts work?</button><p>Payouts are batched weekly and marked paid after transfer confirmation.</p></div><div class="faq"><button onclick="this.parentElement.classList.toggle('open')">Can retailers contact farmers?</button><p>Contact details appear after an order is confirmed.</p></div><button class="primary amber" onclick="openSupport()">Contact Support</button>`;
+      const logout = `<p class="subtle">End your current AgroLink session.</p><button class="danger" onclick="confirmLogout()">Log Out</button>`;
+      return {info: form, orders: placed, listings, notifications, security, help, logout}[accountTab];
+    }
+    function openProductModal() {
+      modal.innerHTML = `<section class="modal-card"><h2 class="section-head display">Add New Product</h2>${["Product name","Category","Description","Price","Unit (kg/piece/litre)","Stock quantity"].map((l,i) => `<div class="field"><label>${l}</label><div class="input-row">${i===2 ? "<textarea rows='3'></textarea>" : "<input>"}</div></div>`).join("")}<div class="field"><label>Upload Photos, up to 5</label><div class="input-row"><input type="file" multiple accept="image/*"></div></div><div class="actions"><button class="primary amber" onclick="closeModal();showToast('Product draft saved')">Save Product</button><button class="ghost" onclick="closeModal()">Cancel</button></div></section>`;
+      modal.classList.add("show");
+    }
+    function showOrder(id) {
+      modal.innerHTML = `<section class="modal-card"><h2 class="section-head display">Order ${id}</h2><p><b>Retailer contact:</b> +880 1812 345678</p><p><b>Delivery:</b> Keraniganj wholesale point</p><div class="tracker">${["Placed","Confirmed","Shipped","Delivered"].map((s,i) => `<div class="step ${i<3?"done":""}">${s}</div>`).join("")}</div><button class="primary" onclick="closeModal()">Close</button></section>`;
+      modal.classList.add("show");
+    }
+    function openSupport() {
+      modal.innerHTML = `<section class="modal-card"><h2 class="section-head display">Contact Support</h2><div class="field"><label>Message</label><div class="input-row"><textarea rows="5" placeholder="Tell us what happened"></textarea></div></div><button class="primary amber" onclick="closeModal();showToast('Support message sent')">Send Message</button></section>`;
+      modal.classList.add("show");
+    }
+    function confirmLogout() {
+      modal.innerHTML = `<section class="modal-card"><h2 class="section-head display">Log Out?</h2><p class="subtle">You will need your phone number and password to return.</p><div class="actions"><button class="danger" onclick="closeModal();showToast('Logged out')">Log Out</button><button class="ghost" onclick="closeModal()">Cancel</button></div></section>`;
+      modal.classList.add("show");
+    }
+    function closeModal() { modal.classList.remove("show"); modal.innerHTML = ""; }
+    modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+    function route() {
+      closeModal();
+      const path = (location.hash || "#/signup").replace("#/","");
+      if (path === "login") authPage("login");
+      else if (path === "market") marketPage();
+      else if (path === "dashboard") dashboardPage();
+      else if (path === "account") accountPage();
+      else authPage("signup");
+    }
+    window.addEventListener("hashchange", route);
+    route();
+  </script>
+</body>
+</html>
